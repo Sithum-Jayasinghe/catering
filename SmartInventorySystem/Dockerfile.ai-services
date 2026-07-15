@@ -1,0 +1,32 @@
+# Multi-stage Dockerfile for AI Services (Node.js / TypeScript)
+FROM node:20-slim AS builder
+WORKDIR /app
+
+COPY ai-services/package*.json ./
+RUN npm install --no-audit --no-fund
+
+COPY ai-services/tsconfig.json ./
+COPY ai-services/src ./src
+RUN npm run build
+
+FROM node:20-slim AS runtime
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+COPY ai-services/package*.json ./
+
+RUN groupadd -r appgroup && useradd -r -g appgroup -m -s /bin/bash appuser && \
+    chown -R appuser:appgroup /app
+USER appuser
+
+EXPOSE 8001
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD curl -f http://localhost:8001/health || exit 1
+
+CMD ["node", "dist/index.js"]

@@ -1,0 +1,54 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SriLankanCatering.Inventory.Domain", "backend\src\SriLankanCatering.Inventory.Domain\SriLankanCatering.Inventory.Domain.csproj", "{D1A9E8B2-4F6A-4C9E-9F8E-1A2B3C4D5E6F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SriLankanCatering.Inventory.Application", "backend\src\SriLankanCatering.Inventory.Application\SriLankanCatering.Inventory.Application.csproj", "{E2B5A1C3-5D7E-4B0F-8A9B-2C3D4E5F6A7B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SriLankanCatering.Inventory.Infrastructure", "backend\src\SriLankanCatering.Inventory.Infrastructure\SriLankanCatering.Inventory.Infrastructure.csproj", "{F3C6B2D4-6E8F-5C1G-9B0C-3D4E5F6A7B8C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SriLankanCatering.Inventory.API", "backend\src\SriLankanCatering.Inventory.API\SriLankanCatering.Inventory.API.csproj", "{A4D7C3E5-7F9G-6D2H-0C1D-4E5F6A7B8C9D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SriLankanCatering.Inventory.UnitTests", "backend\tests\SriLankanCatering.Inventory.UnitTests\SriLankanCatering.Inventory.UnitTests.csproj", "{B5E8D4F6-8G0H-7E3I-1D2E-5F6A7B8C9D0E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SriLankanCatering.Inventory.IntegrationTests", "backend\tests\SriLankanCatering.Inventory.IntegrationTests\SriLankanCatering.Inventory.IntegrationTests.csproj", "{C6F9E5G7-9H1I-8F4J-2E3F-6G7B8C9D0E1F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D1A9E8B2-4F6A-4C9E-9F8E-1A2B3C4D5E6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1A9E8B2-4F6A-4C9E-9F8E-1A2B3C4D5E6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1A9E8B2-4F6A-4C9E-9F8E-1A2B3C4D5E6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1A9E8B2-4F6A-4C9E-9F8E-1A2B3C4D5E6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2B5A1C3-5D7E-4B0F-8A9B-2C3D4E5F6A7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2B5A1C3-5D7E-4B0F-8A9B-2C3D4E5F6A7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2B5A1C3-5D7E-4B0F-8A9B-2C3D4E5F6A7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2B5A1C3-5D7E-4B0F-8A9B-2C3D4E5F6A7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3C6B2D4-6E8F-5C1G-9B0C-3D4E5F6A7B8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3C6B2D4-6E8F-5C1G-9B0C-3D4E5F6A7B8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3C6B2D4-6E8F-5C1G-9B0C-3D4E5F6A7B8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3C6B2D4-6E8F-5C1G-9B0C-3D4E5F6A7B8C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4D7C3E5-7F9G-6D2H-0C1D-4E5F6A7B8C9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4D7C3E5-7F9G-6D2H-0C1D-4E5F6A7B8C9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4D7C3E5-7F9G-6D2H-0C1D-4E5F6A7B8C9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4D7C3E5-7F9G-6D2H-0C1D-4E5F6A7B8C9D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5E8D4F6-8G0H-7E3I-1D2E-5F6A7B8C9D0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5E8D4F6-8G0H-7E3I-1D2E-5F6A7B8C9D0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5E8D4F6-8G0H-7E3I-1D2E-5F6A7B8C9D0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5E8D4F6-8G0H-7E3I-1D2E-5F6A7B8C9D0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6F9E5G7-9H1I-8F4J-2E3F-6G7B8C9D0E1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6F9E5G7-9H1I-8F4J-2E3F-6G7B8C9D0E1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6F9E5G7-9H1I-8F4J-2E3F-6G7B8C9D0E1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6F9E5G7-9H1I-8F4J-2E3F-6G7B8C9D0E1F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A1B2C3D4-E5F6-7890-ABCD-EF1234567890}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,25 @@
+CREATE TABLE [Warehouses] (
+    [Id] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+    [WarehouseCode] NVARCHAR(20) NOT NULL UNIQUE,
+    [Name] NVARCHAR(100) NOT NULL,
+    [Description] NVARCHAR(500),
+    [Type] NVARCHAR(50) NOT NULL,
+    [Status] NVARCHAR(20) NOT NULL,
+    [ContactPerson] NVARCHAR(100),
+    [ContactPhone] NVARCHAR(20),
+    [ContactEmail] NVARCHAR(256),
+    [Capacity] INT NOT NULL DEFAULT 0,
+    [CurrentOccupancy] INT NOT NULL DEFAULT 0,
+    [OperatingHours] NVARCHAR(100),
+    [IsActive] BIT NOT NULL DEFAULT 1,
+    [OpenedDate] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    [IsColdStorage] BIT NOT NULL DEFAULT 0,
+    [IsDryStorage] BIT NOT NULL DEFAULT 0,
+    [CreatedAt] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    [UpdatedAt] DATETIME2,
+    [IsDeleted] BIT NOT NULL DEFAULT 0,
+    [DeletedAt] DATETIME2,
+    [DeletedBy] UNIQUEIDENTIFIER,
+    [RowVersion] ROWVERSION
+);
+CREATE INDEX IX_Warehouses_Code ON Warehouses(WarehouseCode) WHERE IsDeleted = 0;

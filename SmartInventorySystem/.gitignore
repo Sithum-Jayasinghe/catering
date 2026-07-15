@@ -1,0 +1,197 @@
+# ============================================
+# Smart Inventory Management System - .gitignore
+# ============================================
+
+# ==================== OS Files ====================
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# ==================== IDE Files ====================
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.vscode/
+.idea/
+
+# Visual Studio Code
+.vscode/
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# ==================== .NET Backend ====================
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+
+# Visual Studio cache/options
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# NuGet
+*.nupkg
+*.snupkg
+**/packages/*
+!**/packages/build/
+*.nuget.props
+*.nuget.targets
+nuget.config
+
+# ==================== Node.js / Web App / AI Services ====================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build output
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# ==================== React Native / Mobile ====================
+.expo/
+.expo-shared/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Metro
+.metro-health-check*
+
+# ==================== Docker ====================
+# Docker volume data
+docker-volumes/
+*.tar
+*.gz
+
+# Docker logs
+docker-compose.override.yml
+docker/*.log
+
+# ==================== Database ====================
+*.mdf
+*.ldf
+*.ndf
+*.sqlite
+*.db
+
+# ==================== AI Services ====================
+# Model files
+*.pkl
+*.h5
+*.pb
+*.onnx
+
+# Training data
+data/
+models/
+training_output/
+
+# ==================== Test Results ====================
+TestResults/
+coverage/
+.coverage
+.coverage.*
+coverage.*
+*.lcov
+.nyc_output/
+
+# ==================== Misc ====================
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Archives
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# Backup files
+*.bak
+*.backup
+
+# Documentation builds
+site/
+docs/_build/
+
+# Secrets and keys (never commit these)
+secrets/
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
