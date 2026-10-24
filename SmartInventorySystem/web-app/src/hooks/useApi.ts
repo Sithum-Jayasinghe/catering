@@ -1,24 +1,21 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/services/api';
-import { PaginationParams } from '@/types';
+import { ApiResponse, PaginationParams } from '@/types';
+
+// api.getXxx() already unwraps axios and returns ApiResponse<T> directly.
+// We return that ApiResponse so callers can access .data and .pagination.
 
 export function useItems(params?: PaginationParams) {
-  return useQuery({
+  return useQuery<ApiResponse<any[]>>({
     queryKey: ['items', params],
-    queryFn: async () => {
-      const response = await api.getItems(params);
-      return response.data;
-    },
+    queryFn: () => api.getItems(params),
   });
 }
 
 export function useItem(id: string) {
-  return useQuery({
+  return useQuery<ApiResponse<any>>({
     queryKey: ['items', id],
-    queryFn: async () => {
-      const response = await api.getItem(id);
-      return response.data;
-    },
+    queryFn: () => api.getItem(id),
     enabled: !!id,
   });
 }
@@ -54,12 +51,9 @@ export function useDeleteItem() {
 }
 
 export function useSuppliers(params?: PaginationParams) {
-  return useQuery({
+  return useQuery<ApiResponse<any[]>>({
     queryKey: ['suppliers', params],
-    queryFn: async () => {
-      const response = await api.getSuppliers(params);
-      return response.data;
-    },
+    queryFn: () => api.getSuppliers(params),
   });
 }
 
@@ -74,117 +68,85 @@ export function useCreateSupplier() {
 }
 
 export function useWarehouses(params?: PaginationParams) {
-  return useQuery({
+  return useQuery<ApiResponse<any[]>>({
     queryKey: ['warehouses', params],
-    queryFn: async () => {
-      const response = await api.getWarehouses(params);
-      return response.data;
-    },
+    queryFn: () => api.getWarehouses(params),
   });
 }
 
 export function useDashboardStats() {
-  return useQuery({
+  return useQuery<ApiResponse<any>>({
     queryKey: ['dashboard', 'stats'],
-    queryFn: async () => {
-      const response = await api.getDashboardStats();
-      return response.data;
-    },
+    queryFn: () => api.getDashboardStats(),
   });
 }
 
 export function useLowStockAlerts() {
-  return useQuery({
+  return useQuery<ApiResponse<any[]>>({
     queryKey: ['dashboard', 'low-stock'],
-    queryFn: async () => {
-      const response = await api.getLowStockAlerts();
-      return response.data;
-    },
+    queryFn: () => api.getLowStockAlerts(),
   });
 }
 
 export function useExpiryAlerts() {
-  return useQuery({
+  return useQuery<ApiResponse<any[]>>({
     queryKey: ['dashboard', 'expiry-alerts'],
-    queryFn: async () => {
-      const response = await api.getExpiryAlerts();
-      return response.data;
-    },
+    queryFn: () => api.getExpiryAlerts(),
   });
 }
 
 export function usePurchaseOrders(params?: PaginationParams) {
-  return useQuery({
+  return useQuery<ApiResponse<any[]>>({
     queryKey: ['purchase-orders', params],
-    queryFn: async () => {
-      const response = await api.getPurchaseOrders(params);
-      return response.data;
-    },
+    queryFn: () => api.getPurchaseOrders(params),
   });
 }
 
 export function useGoodsReceived(params?: PaginationParams) {
-  return useQuery({
+  return useQuery<ApiResponse<any[]>>({
     queryKey: ['goods-received', params],
-    queryFn: async () => {
-      const response = await api.getGoodsReceived(params);
-      return response.data;
-    },
+    queryFn: () => api.getGoodsReceived(params),
   });
 }
 
 export function useGoodsIssued(params?: PaginationParams) {
-  return useQuery({
+  return useQuery<ApiResponse<any[]>>({
     queryKey: ['goods-issued', params],
-    queryFn: async () => {
-      const response = await api.getGoodsIssued(params);
-      return response.data;
-    },
+    queryFn: () => api.getGoodsIssued(params),
   });
 }
 
 export function useStockTransfers(params?: PaginationParams) {
-  return useQuery({
+  return useQuery<ApiResponse<any[]>>({
     queryKey: ['stock-transfers', params],
-    queryFn: async () => {
-      const response = await api.getStockTransfers(params);
-      return response.data;
-    },
+    queryFn: () => api.getStockTransfers(params),
   });
 }
 
 export function useUsers(params?: PaginationParams) {
-  return useQuery({
+  return useQuery<ApiResponse<any[]>>({
     queryKey: ['users', params],
-    queryFn: async () => {
-      const response = await api.getUsers(params);
-      return response.data;
-    },
+    queryFn: () => api.getUsers(params),
   });
 }
 
 export function useChatWithAI() {
   return useMutation({
-    mutationFn: ({ message, context }: { message: string; context?: Record<string, any> }) => api.chatWithAI(message, context),
+    mutationFn: ({ message, context }: { message: string; context?: Record<string, any> }) =>
+      api.chatWithAI(message, context),
   });
 }
 
 export function useRecommendations() {
-  return useQuery({
+  return useQuery<ApiResponse<any[]>>({
     queryKey: ['ai', 'recommendations'],
-    queryFn: async () => {
-      const response = await api.getRecommendations();
-      return response.data;
-    },
+    queryFn: () => api.getRecommendations(),
   });
 }
 
 export function useAnalytics(params?: { startDate?: string; endDate?: string }) {
-  return useQuery({
+  return useQuery<ApiResponse<any>>({
     queryKey: ['reports', 'analytics', params],
-    queryFn: async () => {
-      const response = await api.getAnalytics(params);
-      return response.data;
-    },
+    queryFn: () => api.getAnalytics(params),
   });
 }

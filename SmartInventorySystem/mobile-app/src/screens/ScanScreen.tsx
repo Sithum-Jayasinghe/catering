@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, Alert, Animated } from 'react-native';
 import { Title, Button, Surface, IconButton } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { APP_CONSTANTS } from '../utils/constants';
 
 export default function ScanScreen() {

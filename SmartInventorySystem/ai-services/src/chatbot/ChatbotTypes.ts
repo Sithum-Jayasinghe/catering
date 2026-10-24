@@ -2,14 +2,25 @@ export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: Date;
-  metadata?: { agent?: string; confidence?: number; toolsUsed?: string[] };
+  metadata?: {
+    agent?: string;
+    confidence?: number;
+    dataCount?: number;
+    executionMs?: number;
+  };
 }
 
 export interface ChatResponse {
   message: string;
   suggestions?: string[];
   actions?: { type: string; label: string; url: string }[];
-  metadata?: { agent?: string; confidence?: number };
+  metadata?: {
+    agent?: string;
+    confidence?: number;
+    dataCount?: number;
+    executionMs?: number;
+    llmPowered?: boolean;
+  };
 }
 
 export interface ChatbotConversation {

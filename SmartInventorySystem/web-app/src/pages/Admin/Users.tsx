@@ -27,6 +27,7 @@ import {
   MenuItem,
   Grid,
   Switch,
+  Avatar,
 } from '@mui/material';
 import {
   Add as AddIcon,

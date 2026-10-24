@@ -64,7 +64,7 @@ export default function Items() {
     setSearch(result);
   };
 
-  const categories = [...new Set(items.map((item: any) => item.category))];
+  const categories: string[] = [...new Set(items.map((item: any) => item.category as string))];
 
   return (
     <Box>

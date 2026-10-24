@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Avatar, TextInput, Button, Surface, IconButton } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { ChatMessage } from '../types';
 import { APP_CONSTANTS } from '../utils/constants';
 

@@ -1,4 +1,4 @@
-import { AgentOrchestrator, AgentResult, AgentContext } from '../agents/AgentOrchestrator';
+import { AgentOrchestrator, AgentResult } from '../agents/AgentOrchestrator.js';
 import { ChatbotService } from '../chatbot/ChatbotService';
 import { McpClient } from '../mcp/McpClient';
 import { VoiceCallSession, VoiceMessage, VoiceReceptionistConfig, VoiceAction, PhoneTransfer } from './VoiceTypes';

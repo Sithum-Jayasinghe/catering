@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert, TouchableOpacity } from 'react-native';
 import { Title, Paragraph, TextInput, Button, Surface, Chip, Divider } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { MaterialIcons } from '@expo/vector-icons';
 import ScanButton from '../components/ScanButton';
 import { APP_CONSTANTS, LOCATION_OPTIONS } from '../utils/constants';
 

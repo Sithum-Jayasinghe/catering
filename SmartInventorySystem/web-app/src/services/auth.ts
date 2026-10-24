@@ -3,8 +3,11 @@ import { api, apiClient } from './api';
 export const auth = {
   async login(email: string, password: string) {
     const response = await api.login({ email, password });
-    const { user, token } = response.data;
+    // Backend returns { token, refreshToken, expiresAt, userId, fullName, role } directly
+    const { token, refreshToken, userId, fullName, role } = response as any;
+    const user = { _id: userId, email, fullName, role };
     localStorage.setItem('token', token);
+    if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
     localStorage.setItem('user', JSON.stringify(user));
     return { user, token };
   },

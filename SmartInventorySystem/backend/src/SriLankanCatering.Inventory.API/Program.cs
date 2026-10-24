@@ -15,6 +15,7 @@ using SriLankanCatering.Inventory.Infrastructure.Configurations;
 using SriLankanCatering.Inventory.Infrastructure.Persistence;
 using SriLankanCatering.Inventory.Infrastructure.Repositories;
 using SriLankanCatering.Inventory.Infrastructure.Services;
+using SriLankanCatering.Inventory.API.Middleware;
 using StackExchange.Redis;
 using System.Threading.RateLimiting;
 
@@ -64,6 +65,10 @@ builder.Services.AddSwaggerGen(c =>
     c.AddSecurityRequirement(new OpenApiSecurityRequirement { { new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } }, Array.Empty<string>() } });
 });
 
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
+builder.Services.Configure<SriLankanCatering.Inventory.Infrastructure.Configurations.DatabaseSettings>(builder.Configuration.GetSection("Database"));
+builder.Services.Configure<SriLankanCatering.Inventory.Infrastructure.Configurations.RedisSettings>(builder.Configuration.GetSection("Redis"));
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IInventoryItemRepository, InventoryItemRepository>();
 builder.Services.AddScoped<IGoodsReceivedNoteRepository, GoodsReceivedNoteRepository>();
@@ -78,7 +83,13 @@ builder.Services.AddScoped<ICacheService, MemoryCacheService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<DateTimeProvider>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpClient("AiService", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("AiService:BaseUrl") ?? "http://localhost:8001");
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
 
 builder.Services.AddCors(options =>
 {
@@ -106,6 +117,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+app.UseExceptionHandlingMiddleware();
 
 if (app.Environment.IsDevelopment())
 {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Title, Paragraph, Button, Surface, IconButton, Divider, SegmentedButtons } from 'react-native-paper';
-import MaterialIcons, { glyphMap } from 'react-native-vector-icons/MaterialIcons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { APP_CONSTANTS } from '../utils/constants';
 
 type ReportType = 'summary' | 'movement' | 'valuation' | 'aging';

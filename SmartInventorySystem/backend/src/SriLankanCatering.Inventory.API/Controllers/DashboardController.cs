@@ -94,14 +94,47 @@ public class DashboardController : ControllerBase
     }
 
     [HttpGet("insights")]
-    public async Task<ActionResult<IEnumerable<AiInsightDto>>> GetInsights(CancellationToken ct)
+    public async Task<ActionResult<IEnumerable<AiInsightDto>>> GetInsights([FromServices] IHttpClientFactory httpClientFactory, CancellationToken ct)
     {
-        return Ok(new List<AiInsightDto>
+        try
         {
-            new() { Title = "Low Stock Alert", Insight = "5 items below reorder level", Category = "Inventory", Priority = "High", GeneratedAt = DateTime.UtcNow, SourceAgent = "InventoryAgent", ConfidenceScore = 0.92, IsActionable = true },
-            new() { Title = "Expiry Warning", Insight = "3 batches expiring within 7 days", Category = "Quality", Priority = "Critical", GeneratedAt = DateTime.UtcNow, SourceAgent = "ExpiryAgent", ConfidenceScore = 0.98, IsActionable = true },
-            new() { Title = "Supplier Delay Risk", Insight = "Supplier X had 20% late delivery rate", Category = "Procurement", Priority = "Medium", GeneratedAt = DateTime.UtcNow, SourceAgent = "SupplierAgent", ConfidenceScore = 0.85, IsActionable = true },
-        });
+            var client = httpClientFactory.CreateClient("AiService");
+            var payload = new { prompt = "Generate dashboard insights", context = new { userId = "system" } };
+            var json = System.Text.Json.JsonSerializer.Serialize(payload);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            var response = await client.PostAsync("/api/ai/agents/run-all", content, ct);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var resultJson = await response.Content.ReadFromJsonAsync<AgentRunAllResponse>(ct);
+                if (resultJson?.Results != null)
+                {
+                    return Ok(resultJson.Results.Where(r => r.Success).Select(r => new AiInsightDto
+                    {
+                        Title = r.AgentName ?? "AI Insight",
+                        Insight = r.Insight ?? string.Empty,
+                        Category = r.AgentName ?? "General",
+                        Priority = r.Confidence > 0.9 ? "High" : "Medium",
+                        GeneratedAt = DateTime.UtcNow,
+                        SourceAgent = r.AgentName,
+                        ConfidenceScore = r.Confidence,
+                        IsActionable = true,
+                    }));
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "AI service unavailable for dashboard insights");
+        }
+
+        // Fallback — compute from real data
+        var lowStock = await _items.GetLowStockItemsAsync(ct);
+        var expiring = await _items.GetExpiringItemsAsync(7, ct);
+        var insights = new List<AiInsightDto>();
+        if (lowStock.Count > 0) insights.Add(new() { Title = "Low Stock Alert", Insight = $"{lowStock.Count} items at or below reorder level", Category = "Inventory", Priority = "High", GeneratedAt = DateTime.UtcNow, SourceAgent = "InventoryAgent", ConfidenceScore = 0.95, IsActionable = true });
+        if (expiring.Count > 0) insights.Add(new() { Title = "Expiry Warning", Insight = $"{expiring.Count} items have batches expiring within 7 days", Category = "Quality", Priority = "Critical", GeneratedAt = DateTime.UtcNow, SourceAgent = "ExpiryAgent", ConfidenceScore = 0.98, IsActionable = true });
+        return Ok(insights);
     }
 
     private Guid GetCurrentUserId() => Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? Guid.Empty.ToString());

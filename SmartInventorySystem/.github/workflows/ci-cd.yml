@@ -9,10 +9,11 @@ on:
 env:
   DOTNET_VERSION: '10.0.x'
   NODE_VERSION: '20.x'
-  SOLUTION_PATH: 'backend/src/SriLankanCatering.Inventory.API/SriLankanCatering.Inventory.API.csproj'
-  TEST_PROJECT: 'backend/tests/SriLankanCatering.Inventory.Tests/SriLankanCatering.Inventory.Tests.csproj'
+  SOLUTION_PATH: 'SmartInventorySystem/backend/SmartInventorySystem.sln'
+  UNIT_TEST_PROJECT: 'SmartInventorySystem/backend/tests/SriLankanCatering.Inventory.UnitTests/SriLankanCatering.Inventory.UnitTests.csproj'
 
 jobs:
+  # ──────────────────────────────────────────────────────────────────────────
   backend-build-and-test:
     name: Backend Build & Test
     runs-on: ubuntu-latest
@@ -20,7 +21,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup .NET
+      - name: Setup .NET ${{ env.DOTNET_VERSION }}
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
@@ -28,13 +29,18 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore ${{ env.SOLUTION_PATH }}
 
-      - name: Build
+      - name: Build solution (Release)
         run: dotnet build ${{ env.SOLUTION_PATH }} -c Release --no-restore
 
-      - name: Run xUnit tests
-        run: dotnet test ${{ env.TEST_PROJECT }} -c Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
+      - name: Run unit tests
+        run: >
+          dotnet test ${{ env.UNIT_TEST_PROJECT }}
+          -c Release
+          --no-build
+          --verbosity normal
+          --logger "trx;LogFileName=unit-test-results.trx"
 
-      - name: Publish test results
+      - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -42,6 +48,7 @@ jobs:
           path: '**/*.trx'
           retention-days: 30
 
+  # ──────────────────────────────────────────────────────────────────────────
   webapp-build-and-test:
     name: Web App Build & Test
     runs-on: ubuntu-latest
@@ -49,36 +56,37 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: 'webapp/package-lock.json'
+          cache-dependency-path: 'SmartInventorySystem/web-app/package-lock.json'
 
       - name: Install dependencies
-        working-directory: ./webapp
+        working-directory: SmartInventorySystem/web-app
         run: npm ci
 
       - name: Run lint
-        working-directory: ./webapp
+        working-directory: SmartInventorySystem/web-app
         run: npm run lint
 
       - name: Run tests
-        working-directory: ./webapp
-        run: npm run test -- --run
+        working-directory: SmartInventorySystem/web-app
+        run: npm run test
 
       - name: Build
-        working-directory: ./webapp
+        working-directory: SmartInventorySystem/web-app
         run: npm run build
 
-      - name: Publish build artifacts
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: webapp-build
-          path: 'webapp/dist/**'
+          path: 'SmartInventorySystem/web-app/dist/**'
           retention-days: 7
 
+  # ──────────────────────────────────────────────────────────────────────────
   ai-services-build-and-test:
     name: AI Services Build & Test
     runs-on: ubuntu-latest
@@ -86,29 +94,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
         with:
-          python-version: '3.11'
-          cache: 'pip'
-          cache-dependency-path: 'ai-services/requirements.txt'
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'SmartInventorySystem/ai-services/package-lock.json'
 
       - name: Install dependencies
-        working-directory: ./ai-services
-        run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install flake8 pytest
+        working-directory: SmartInventorySystem/ai-services
+        run: npm ci
 
-      - name: Run lint
-        working-directory: ./ai-services
-        run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+      - name: Build TypeScript
+        working-directory: SmartInventorySystem/ai-services
+        run: npm run build
 
       - name: Run tests
-        working-directory: ./ai-services
-        run: |
-          if [ -d "tests" ]; then python -m pytest tests/ -v; fi
+        working-directory: SmartInventorySystem/ai-services
+        run: npm test -- --passWithNoTests
 
+  # ──────────────────────────────────────────────────────────────────────────
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest
@@ -125,11 +130,13 @@ jobs:
           format: 'sarif'
           output: 'trivy-results.sarif'
 
-      - name: Upload Trivy results
+      - name: Upload Trivy results to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
+        if: always()
         with:
           sarif_file: 'trivy-results.sarif'
 
+  # ──────────────────────────────────────────────────────────────────────────
   build-and-push-docker:
     name: Build & Push Docker Images
     needs: security-scan
@@ -161,39 +168,46 @@ jobs:
             type=ref,event=tag
             type=semver,pattern={{version}}
 
-      - name: Build and push Backend
+      - name: Build and push Backend image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile.backend
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/smartinventory-backend:${{ github.sha }},${{ secrets.DOCKER_USERNAME }}/smartinventory-backend:latest
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/smartinventory-backend:${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/smartinventory-backend:latest
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/smartinventory-backend:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/smartinventory-backend:buildcache,mode=max
 
-      - name: Build and push Web App
+      - name: Build and push Web App image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile.webapp
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/smartinventory-webapp:${{ github.sha }},${{ secrets.DOCKER_USERNAME }}/smartinventory-webapp:latest
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/smartinventory-webapp:${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/smartinventory-webapp:latest
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/smartinventory-webapp:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/smartinventory-webapp:buildcache,mode=max
 
-      - name: Build and push AI Services
+      - name: Build and push AI Services image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile.ai-services
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/smartinventory-ai:${{ github.sha }},${{ secrets.DOCKER_USERNAME }}/smartinventory-ai:latest
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/smartinventory-ai:${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/smartinventory-ai:latest
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/smartinventory-ai:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/smartinventory-ai:buildcache,mode=max
 
+  # ──────────────────────────────────────────────────────────────────────────
   deploy:
     name: Deploy to Production
     needs: build-and-push-docker
@@ -209,41 +223,14 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Download backend build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: backend-build
-          path: ./backend-publish
-
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT }}
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             cd /opt/smartinventory
-
-            # Create backup before deploy
-            powershell -File scripts/backup.ps1
-
-            # Pull latest images
-            docker-compose pull
-
-            # Run migrations
-            docker-compose run --rm backend dotnet ef database update
-
-            # Deploy with zero-downtime
-            docker-compose up -d --force-recreate --remove-orphans
-
-            # Wait for health checks
-            echo "Waiting for services..."
-            sleep 30
-
-            # Verify deployment
-            docker-compose ps
-            docker-compose logs --tail=50
-
-            # Cleanup
-            docker system prune -f
+            docker compose pull
+            docker compose up -d --remove-orphans
+            docker image prune -f

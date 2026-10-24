@@ -12,8 +12,12 @@ export interface User {
 }
 
 export interface AuthResponse {
-  user: User;
   token: string;
+  refreshToken: string;
+  expiresAt: string;
+  userId: string;
+  fullName: string;
+  role: string;
 }
 
 export interface LoginRequest {

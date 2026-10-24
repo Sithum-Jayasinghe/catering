@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, FlatList } from 'react-native';
 import { Title, TextInput, Button, Surface, IconButton, ActivityIndicator, Chip } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { MaterialIcons } from '@expo/vector-icons';
 import AIChatMessage from '../components/AIChatMessage';
 import { ChatMessage, AIInsight } from '../types';
 import { APP_CONSTANTS } from '../utils/constants';

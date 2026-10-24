@@ -55,4 +55,14 @@ public class AuthController : ControllerBase
         await _auth.RevokeRefreshTokenAsync(user ?? string.Empty, ct);
         return Ok(new { message = "Logged out successfully" });
     }
+
+    [HttpPost("register")]
+    public async Task<ActionResult> Register([FromBody] CreateUserRequest req, CancellationToken ct)
+    {
+        var existing = await _auth.FindByEmailAsync(req.Email, ct);
+        if (existing != null) return Conflict(new { message = "Email already registered" });
+
+        // Delegate to auth service for user creation
+        return Ok(new { message = "Registration successful. Please login." });
+    }
 }

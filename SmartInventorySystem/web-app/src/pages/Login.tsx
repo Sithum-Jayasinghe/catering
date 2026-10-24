@@ -15,7 +15,7 @@ import { Visibility, VisibilityOff, Inventory as InventoryIcon } from '@mui/icon
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useLogin } from '@/hooks/useAuth';
+import { useLogin, useAuth } from '@/hooks/useAuth';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),

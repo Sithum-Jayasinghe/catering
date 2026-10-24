@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, Text, Button } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { View, ActivityIndicator } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useAuth } from '../hooks/useAuth';
 import LoginScreen from '../screens/LoginScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import InventoryListScreen from '../screens/InventoryListScreen';
@@ -13,6 +13,7 @@ import ReceiveScreen from '../screens/ReceiveScreen';
 import AIChatScreen from '../screens/AIChatScreen';
 import ReportsScreen from '../screens/ReportsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import { APP_CONSTANTS } from '../utils/constants';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -49,7 +50,7 @@ function MainTabs() {
           else if (route.name === 'Settings') iconName = 'settings';
           return <MaterialIcons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#1e40af',
+        tabBarActiveTintColor: APP_CONSTANTS.THEME.PRIMARY,
         tabBarInactiveTintColor: '#94a3b8',
         headerShown: false,
         tabBarStyle: { backgroundColor: '#ffffff' },
@@ -68,20 +69,23 @@ function MainTabs() {
 }
 
 export default function AppNavigator() {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color={APP_CONSTANTS.THEME.PRIMARY} />
+      </View>
+    );
+  }
+
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen
-          name="Login"
-          component={LoginScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="MainTabs"
-          component={MainTabs}
-          options={{ headerShown: false }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {isAuthenticated ? (
+        <Stack.Screen name="MainTabs" component={MainTabs} />
+      ) : (
+        <Stack.Screen name="Login" component={LoginScreen} />
+      )}
+    </Stack.Navigator>
   );
 }

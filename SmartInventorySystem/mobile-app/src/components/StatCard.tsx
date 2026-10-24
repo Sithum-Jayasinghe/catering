@@ -1,13 +1,14 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Icon, useTheme } from 'react-native-paper';
-import MaterialIcons, { glyphMap } from 'react-native-vector-icons/MaterialIcons';
+import { MaterialIcons } from '@expo/vector-icons';
+import { ComponentProps } from 'react';
+import { useTheme } from 'react-native-paper';
 import { APP_CONSTANTS } from '../utils/constants';
 
 interface StatCardProps {
   title: string;
   value: string | number;
-  icon: keyof typeof glyphMap;
+  icon: ComponentProps<typeof MaterialIcons>['name'];
   color?: string;
   trend?: {
     value: number;

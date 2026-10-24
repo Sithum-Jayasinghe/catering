@@ -27,7 +27,6 @@ public class InventoryController : ControllerBase
     }
 
     [HttpGet]
-    [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<InventoryItemDto>>> GetAll(CancellationToken ct)
     {
         var items = await _repo.GetAllAsync(ct);

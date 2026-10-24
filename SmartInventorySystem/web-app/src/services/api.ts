@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { ApiResponse } from '@/types';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -24,7 +24,8 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Only redirect to login on 401 for non-auth endpoints
+    if (error.response?.status === 401 && !error.config?.url?.includes('/auth/')) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
@@ -36,7 +37,7 @@ apiClient.interceptors.response.use(
 export const api = {
   // Auth
   login: async (credentials: { email: string; password: string }) => {
-    const { data } = await apiClient.post<ApiResponse<{ user: any; token: string }>>('/auth/login', credentials);
+    const { data } = await apiClient.post<{ token: string; refreshToken: string; expiresAt: string; userId: string; fullName: string; role: string }>('/auth/login', credentials);
     return data;
   },
 

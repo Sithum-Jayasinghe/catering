@@ -26,7 +26,7 @@ export function useLogin() {
 export function useLogout() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: auth.logout,
+    mutationFn: async () => { await auth.logout(); },
     onSettled: () => {
       queryClient.clear();
       window.location.href = '/login';

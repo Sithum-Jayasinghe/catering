@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using SriLankanCatering.Inventory.Application.DTOs;
 using SriLankanCatering.Inventory.Application.Abstractions;
 using Microsoft.AspNetCore.Authorization;
+using SriLankanCatering.Inventory.Domain.Enums;
 
 namespace SriLankanCatering.Inventory.API.Controllers;
 
@@ -15,11 +16,13 @@ namespace SriLankanCatering.Inventory.API.Controllers;
 public class PurchaseOrdersController : ControllerBase
 {
     private readonly IPurchaseOrderRepository _repo;
+    private readonly IUnitOfWork _uow;
     private readonly ILogger<PurchaseOrdersController> _logger;
 
-    public PurchaseOrdersController(IPurchaseOrderRepository repo, ILogger<PurchaseOrdersController> logger)
+    public PurchaseOrdersController(IPurchaseOrderRepository repo, IUnitOfWork uow, ILogger<PurchaseOrdersController> logger)
     {
         _repo = repo;
+        _uow = uow;
         _logger = logger;
     }
 
@@ -60,9 +63,11 @@ public class PurchaseOrdersController : ControllerBase
     {
         var existing = await _repo.GetWithLinesAsync(id, ct);
         if (existing == null) return NotFound();
-        existing.Status = Domain.Enums.PurchaseOrderStatus.Approved;
+        existing.Status = PurchaseOrderStatus.Approved;
         existing.ApprovedBy = GetCurrentUserId();
         existing.ApprovedAt = DateTime.UtcNow;
+        _repo.Update(existing);
+        await _uow.CommitAsync(ct);
         return Ok(MapToDto(existing));
     }
 

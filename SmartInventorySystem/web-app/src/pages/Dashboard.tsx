@@ -37,9 +37,13 @@ import { useDashboardStats, useLowStockAlerts, useExpiryAlerts } from '@/hooks/u
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title, PointElement, LineElement);
 
 export default function Dashboard() {
-  const { data: stats, isLoading: statsLoading } = useDashboardStats();
-  const { data: lowStockAlerts, isLoading: alertsLoading } = useLowStockAlerts();
-  const { data: expiryAlerts } = useExpiryAlerts();
+  const { data: statsResponse, isLoading: statsLoading } = useDashboardStats();
+  const { data: lowStockResponse, isLoading: alertsLoading } = useLowStockAlerts();
+  const { data: expiryResponse } = useExpiryAlerts();
+
+  const stats = statsResponse?.data;
+  const lowStockAlerts = lowStockResponse?.data;
+  const expiryAlerts = expiryResponse?.data;
 
   const statCards = [
     {

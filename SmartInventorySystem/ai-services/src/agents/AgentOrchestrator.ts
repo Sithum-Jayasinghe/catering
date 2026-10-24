@@ -1,67 +1,133 @@
-import { McpClient } from '../../src/mcp/McpClient';
-import { RagEngine } from '../rag/RagEngine';
-import { EmbeddingService } from '../rag/EmbeddingService';
-import { BaseAgent, InventoryAgent, ProcurementAgent, SupplierAgent, ExpiryAgent, ForecastAgent, ReportingAgent, FinanceAgent, KitchenAgent, QualityAssuranceAgent, NotificationAgent } from './BaseAgents';
-import { OcrService } from '../ocr/OcrService';
+import {
+  BaseAgent, AgentResult,
+  InventoryAgent, ProcurementAgent, SupplierAgent, ExpiryAgent,
+  ForecastAgent, ReportingAgent, FinanceAgent, KitchenAgent,
+  QualityAssuranceAgent, NotificationAgent,
+} from './BaseAgents.js';
 
-export interface AgentResult {
+export type { AgentResult };
+
+export interface AgentRunAllResult {
+  agentName: string;
   success: boolean;
   insight: string;
   confidence: number;
-  actions: { type: string; payload: unknown }[];
-}
-
-export interface AgentContext {
-  userId: string;
-  warehouseId?: string;
-  filters?: Record<string, unknown>;
+  executionTimeMs: number;
+  actionsCount: number;
+  dataCount: number;
+  error?: string;
 }
 
 export class AgentOrchestrator {
-  private mcp: McpClient;
-  private rag: RagEngine;
-  private embeddings: EmbeddingService;
   private agents: Map<string, BaseAgent>;
-  public ocrService: OcrService;
 
   constructor() {
-    this.mcp = new McpClient();
-    this.rag = new RagEngine();
-    this.embeddings = new EmbeddingService();
     this.agents = new Map<string, BaseAgent>();
-    this.ocrService = new OcrService(this.mcp);
     this.registerAgents();
   }
 
-  private registerAgents() {
-    this.agents.set('InventoryAgent', new InventoryAgent(this.mcp, this.rag, this.embeddings));
-    this.agents.set('ProcurementAgent', new ProcurementAgent(this.mcp, this.rag, this.embeddings));
-    this.agents.set('SupplierAgent', new SupplierAgent(this.mcp, this.rag, this.embeddings));
-    this.agents.set('ExpiryAgent', new ExpiryAgent(this.mcp, this.rag, this.embeddings));
-    this.agents.set('ForecastAgent', new ForecastAgent(this.mcp, this.rag, this.embeddings));
-    this.agents.set('ReportingAgent', new ReportingAgent(this.mcp, this.rag, this.embeddings));
-    this.agents.set('FinanceAgent', new FinanceAgent(this.mcp, this.rag, this.embeddings));
-    this.agents.set('KitchenAgent', new KitchenAgent(this.mcp, this.rag, this.embeddings));
-    this.agents.set('QualityAssuranceAgent', new QualityAssuranceAgent(this.mcp, this.rag, this.embeddings));
-    this.agents.set('NotificationAgent', new NotificationAgent(this.mcp, this.rag, this.embeddings));
-  }
-
-  async runAgent(agentType: string, prompt: string, context: Record<string, unknown>): Promise<AgentResult> {
-    const agent = this.agents.get(agentType);
-    if (!agent) return { success: false, insight: 'Agent not found', confidence: 0, actions: [] };
-    return agent.execute(prompt, context);
-  }
-
-  async runAllAgents(): Promise<Record<string, { success: boolean; insight: string; confidence: number }>> {
-    const results: Record<string, { success: boolean; insight: string; confidence: number }> = {};
-    for (const [name, agent] of this.agents) {
-      const result = await agent.execute('Run scheduled check', { userId: 'system' });
-      results[name] = { success: result.success, insight: result.insight, confidence: result.confidence };
+  private registerAgents(): void {
+    const all: BaseAgent[] = [
+      new InventoryAgent(),
+      new ProcurementAgent(),
+      new SupplierAgent(),
+      new ExpiryAgent(),
+      new KitchenAgent(),
+      new ForecastAgent(),
+      new ReportingAgent(),
+      new FinanceAgent(),
+      new QualityAssuranceAgent(),
+      new NotificationAgent(),
+    ];
+    for (const agent of all) {
+      this.agents.set(agent.name, agent);
     }
-    return results;
   }
 
   getAvailableAgents(): string[] {
     return Array.from(this.agents.keys());
+  }
+
+  async runAgent(
+    agentType: string,
+    prompt: string,
+    context: Record<string, unknown> = {},
+  ): Promise<AgentResult> {
+    const agent = this.agents.get(agentType);
+    if (!agent) {
+      return {
+        agentName: agentType,
+        success: false,
+        insight: `Agent "${agentType}" not found. Available: ${this.getAvailableAgents().join(', ')}`,
+        confidence: 0,
+        data: [],
+        actions: [],
+        executionTimeMs: 0,
+      };
+    }
+    try {
+      return await agent.execute(prompt, context);
+    } catch (err) {
+      return {
+        agentName: agentType,
+        success: false,
+        insight: `Agent "${agentType}" failed: ${err instanceof Error ? err.message : String(err)}`,
+        confidence: 0,
+        data: [],
+        actions: [],
+        executionTimeMs: 0,
+      };
+    }
+  }
+
+  async runAllAgents(
+    prompt = 'Run scheduled check',
+    context: Record<string, unknown> = { userId: 'system' },
+  ): Promise<AgentRunAllResult[]> {
+    const results: AgentRunAllResult[] = [];
+
+    // Run all agents concurrently for speed
+    const settled = await Promise.allSettled(
+      Array.from(this.agents.entries()).map(async ([name, agent]) => {
+        try {
+          const r = await agent.execute(prompt, context);
+          return {
+            agentName: name,
+            success: r.success,
+            insight: r.insight,
+            confidence: r.confidence,
+            executionTimeMs: r.executionTimeMs,
+            actionsCount: r.actions.length,
+            dataCount: r.data.length,
+          } as AgentRunAllResult;
+        } catch (err) {
+          return {
+            agentName: name,
+            success: false,
+            insight: '',
+            confidence: 0,
+            executionTimeMs: 0,
+            actionsCount: 0,
+            dataCount: 0,
+            error: err instanceof Error ? err.message : String(err),
+          } as AgentRunAllResult;
+        }
+      }),
+    );
+
+    for (const s of settled) {
+      results.push(s.status === 'fulfilled' ? s.value : {
+        agentName: 'unknown',
+        success: false,
+        insight: '',
+        confidence: 0,
+        executionTimeMs: 0,
+        actionsCount: 0,
+        dataCount: 0,
+        error: s.reason instanceof Error ? s.reason.message : String(s.reason),
+      });
+    }
+
+    return results;
   }
 }

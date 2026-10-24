@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Alert } from 'react-native';
 import { Searchbar, Chip, Portal, Modal, FAB, IconButton, Button } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { MaterialIcons } from '@expo/vector-icons';
 import InventoryCard from '../components/InventoryCard';
 import { InventoryItem } from '../types';
 import { APP_CONSTANTS, CATEGORY_OPTIONS } from '../utils/constants';

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Switch, Alert, Linking } from 'react-native';
 import { Title, Paragraph, Switch as PaperSwitch, Divider, List, Surface, IconButton, Button } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { APP_CONSTANTS } from '../utils/constants';
 
 export default function SettingsScreen() {

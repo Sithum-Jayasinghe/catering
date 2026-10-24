@@ -29,9 +29,4 @@ public class CreateInventoryItemRequest
     public string? ImageUrl { get; set; }
 }
 
-public class UpdateInventoryItemRequest : CreateInventoryItemRequest
-{
-    public Guid Id { get; set; }
-    public bool IsActive { get; set; }
-    public bool IsDiscontinued { get; set; }
-}
+// UpdateInventoryItemRequest is defined in RequestDtos.cs
