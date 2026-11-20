@@ -8,7 +8,6 @@ using SriLankanCatering.Inventory.Application.DTOs;
 using SriLankanCatering.Inventory.Domain.Entities;
 using SriLankanCatering.Inventory.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
-using BCrypt.Net;
 
 namespace SriLankanCatering.Inventory.API.Controllers;
 
@@ -47,16 +46,19 @@ public class UsersController : ControllerBase
         var existing = await _repo.GetByEmailAsync(req.Email, ct);
         if (existing != null) return Conflict(new { message = "Email already in use" });
 
+        var nameParts = req.FullName.Split(' ', 2);
         var entity = new User
         {
-            FullName = req.FullName,
+            FirstName = nameParts[0],
+            LastName = nameParts.Length > 1 ? nameParts[1] : string.Empty,
             Email = req.Email,
+            PhoneNumber = string.Empty,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.Password),
-            Role = Enum.Parse<UserRole>(req.Role),
+            Role = Enum.Parse<UserRole>(req.Role, ignoreCase: true),
             Department = req.Department,
             WarehouseId = req.WarehouseId,
             Status = UserStatus.Active,
-            UserCode = $"USR-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..6].ToUpper()}",
+            UserCode = $"USR-{Guid.NewGuid().ToString("N")[..8].ToUpper()}",
         };
         await _repo.AddAsync(entity, ct);
         await _uow.CommitAsync(ct);
@@ -69,9 +71,11 @@ public class UsersController : ControllerBase
         var existing = await _repo.GetByIdAsync(id, ct);
         if (existing == null) return NotFound();
 
-        existing.FullName = req.FullName;
+        var nameParts = req.FullName.Split(' ', 2);
+        existing.FirstName = nameParts[0];
+        existing.LastName = nameParts.Length > 1 ? nameParts[1] : string.Empty;
         existing.Department = req.Department;
-        existing.Role = Enum.Parse<UserRole>(req.Role);
+        existing.Role = Enum.Parse<UserRole>(req.Role, ignoreCase: true);
         existing.WarehouseId = req.WarehouseId;
         _repo.Update(existing);
         await _uow.CommitAsync(ct);
@@ -84,7 +88,6 @@ public class UsersController : ControllerBase
         var existing = await _repo.GetByIdAsync(id, ct);
         if (existing == null) return NotFound();
         existing.Status = UserStatus.Inactive;
-        existing.IsActive = false;
         _repo.Update(existing);
         await _uow.CommitAsync(ct);
         return NoContent();

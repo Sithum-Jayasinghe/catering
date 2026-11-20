@@ -7,7 +7,6 @@ using SriLankanCatering.Inventory.Application.Abstractions;
 using SriLankanCatering.Inventory.Application.DTOs;
 using SriLankanCatering.Inventory.Domain.Entities;
 using SriLankanCatering.Inventory.Domain.Common;
-using SriLankanCatering.Inventory.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 
 namespace SriLankanCatering.Inventory.API.Controllers;
@@ -58,9 +57,11 @@ public class SuppliersController : ControllerBase
         {
             SupplierCode = req.SupplierCode,
             Name = req.Name,
+            RegistrationNumber = $"REG-{Guid.NewGuid().ToString("N")[..8].ToUpper()}",
             ContactPerson = req.ContactPerson,
             ContactEmail = req.ContactEmail,
             ContactPhone = req.ContactPhone,
+            ContactFax = string.Empty,
             Website = req.Website,
             Address = new Address
             {
@@ -71,7 +72,7 @@ public class SuppliersController : ControllerBase
                 Country = req.Country ?? "Sri Lanka",
             },
             PaymentTerms = req.PaymentTerms,
-            LeadTimeDays = req.LeadTimeDays,
+            AverageLeadTimeDays = req.LeadTimeDays,
             Notes = req.Notes,
             Status = SupplierStatus.Active,
         };
@@ -93,7 +94,7 @@ public class SuppliersController : ControllerBase
         existing.ContactPhone = req.ContactPhone;
         existing.Website = req.Website;
         existing.PaymentTerms = req.PaymentTerms;
-        existing.LeadTimeDays = req.LeadTimeDays;
+        existing.AverageLeadTimeDays = req.LeadTimeDays;
         existing.Notes = req.Notes;
         if (req.StreetAddress != null)
         {
@@ -118,7 +119,6 @@ public class SuppliersController : ControllerBase
         var existing = await _repo.GetByIdAsync(id, ct);
         if (existing == null) return NotFound();
         existing.Status = SupplierStatus.Inactive;
-        existing.IsActive = false;
         _repo.Update(existing);
         await _uow.CommitAsync(ct);
         return NoContent();

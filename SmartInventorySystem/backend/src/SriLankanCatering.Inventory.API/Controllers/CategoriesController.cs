@@ -46,13 +46,15 @@ public class CategoriesController : ControllerBase
         var entity = new Category
         {
             Name = req.Name,
-            Description = req.Description,
+            Description = req.Description ?? string.Empty,
+            CreatedBy = User.Identity?.Name ?? "system",
             ParentCategoryId = req.ParentCategoryId,
             IsActive = true,
         };
         await _repo.AddAsync(entity, ct);
         await _uow.CommitAsync(ct);
-        return CreatedAtAction(nameof(GetById), new { id = entity.Id }, new { entity.Id, entity.Name, entity.Description, entity.ParentCategoryId, entity.IsActive, entity.CreatedAt });
+        return CreatedAtAction(nameof(GetById), new { id = entity.Id },
+            new { entity.Id, entity.Name, entity.Description, entity.ParentCategoryId, entity.IsActive, entity.CreatedAt });
     }
 
     [HttpPut("{id}")]
@@ -62,7 +64,7 @@ public class CategoriesController : ControllerBase
         var existing = await _repo.GetByIdAsync(id, ct);
         if (existing == null) return NotFound();
         existing.Name = req.Name;
-        existing.Description = req.Description;
+        existing.Description = req.Description ?? string.Empty;
         existing.ParentCategoryId = req.ParentCategoryId;
         _repo.Update(existing);
         await _uow.CommitAsync(ct);

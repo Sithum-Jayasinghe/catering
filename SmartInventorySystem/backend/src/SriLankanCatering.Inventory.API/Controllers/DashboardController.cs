@@ -106,21 +106,19 @@ public class DashboardController : ControllerBase
 
             if (response.IsSuccessStatusCode)
             {
-                var resultJson = await response.Content.ReadFromJsonAsync<AgentRunAllResponse>(ct);
-                if (resultJson?.Results != null)
+                var resultJson = await response.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>(ct);
+                var results = resultJson.TryGetProperty("results", out var r) ? r.EnumerateArray() : default;
+                var aiInsights = new List<AiInsightDto>();
+                foreach (var item in results)
                 {
-                    return Ok(resultJson.Results.Where(r => r.Success).Select(r => new AiInsightDto
-                    {
-                        Title = r.AgentName ?? "AI Insight",
-                        Insight = r.Insight ?? string.Empty,
-                        Category = r.AgentName ?? "General",
-                        Priority = r.Confidence > 0.9 ? "High" : "Medium",
-                        GeneratedAt = DateTime.UtcNow,
-                        SourceAgent = r.AgentName,
-                        ConfidenceScore = r.Confidence,
-                        IsActionable = true,
-                    }));
+                    bool success = item.TryGetProperty("success", out var s) && s.GetBoolean();
+                    if (!success) continue;
+                    string agentName = item.TryGetProperty("agentName", out var an) ? an.GetString() ?? "AI" : "AI";
+                    string insight = item.TryGetProperty("insight", out var ins) ? ins.GetString() ?? string.Empty : string.Empty;
+                    double confidence = item.TryGetProperty("confidence", out var c2) ? c2.GetDouble() : 0.8;
+                    aiInsights.Add(new AiInsightDto { Title = agentName, Insight = insight, Category = agentName, Priority = confidence > 0.9 ? "High" : "Medium", GeneratedAt = DateTime.UtcNow, SourceAgent = agentName, ConfidenceScore = confidence, IsActionable = true });
                 }
+                if (aiInsights.Count > 0) return Ok(aiInsights);
             }
         }
         catch (Exception ex)
@@ -129,12 +127,12 @@ public class DashboardController : ControllerBase
         }
 
         // Fallback — compute from real data
-        var lowStock = await _items.GetLowStockItemsAsync(ct);
-        var expiring = await _items.GetExpiringItemsAsync(7, ct);
-        var insights = new List<AiInsightDto>();
-        if (lowStock.Count > 0) insights.Add(new() { Title = "Low Stock Alert", Insight = $"{lowStock.Count} items at or below reorder level", Category = "Inventory", Priority = "High", GeneratedAt = DateTime.UtcNow, SourceAgent = "InventoryAgent", ConfidenceScore = 0.95, IsActionable = true });
-        if (expiring.Count > 0) insights.Add(new() { Title = "Expiry Warning", Insight = $"{expiring.Count} items have batches expiring within 7 days", Category = "Quality", Priority = "Critical", GeneratedAt = DateTime.UtcNow, SourceAgent = "ExpiryAgent", ConfidenceScore = 0.98, IsActionable = true });
-        return Ok(insights);
+        var lowStockFallback = await _items.GetLowStockItemsAsync(ct);
+        var expiringFallback = await _items.GetExpiringItemsAsync(7, ct);
+        var fallbackInsights = new List<AiInsightDto>();
+        if (lowStockFallback.Count > 0) fallbackInsights.Add(new() { Title = "Low Stock Alert", Insight = $"{lowStockFallback.Count} items at or below reorder level", Category = "Inventory", Priority = "High", GeneratedAt = DateTime.UtcNow, SourceAgent = "InventoryAgent", ConfidenceScore = 0.95, IsActionable = true });
+        if (expiringFallback.Count > 0) fallbackInsights.Add(new() { Title = "Expiry Warning", Insight = $"{expiringFallback.Count} items have batches expiring within 7 days", Category = "Quality", Priority = "Critical", GeneratedAt = DateTime.UtcNow, SourceAgent = "ExpiryAgent", ConfidenceScore = 0.98, IsActionable = true });
+        return Ok(fallbackInsights);
     }
 
     private Guid GetCurrentUserId() => Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? Guid.Empty.ToString());

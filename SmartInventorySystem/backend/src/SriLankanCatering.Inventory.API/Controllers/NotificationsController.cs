@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using SriLankanCatering.Inventory.Application.Abstractions;
 using SriLankanCatering.Inventory.Application.DTOs;
 using SriLankanCatering.Inventory.Domain.Entities;
+using SriLankanCatering.Inventory.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 
 namespace SriLankanCatering.Inventory.API.Controllers;
@@ -74,7 +75,9 @@ public class NotificationsController : ControllerBase
         {
             Title = req.Title,
             Message = req.Message,
-            Type = req.Type,
+            Type = Enum.Parse<NotificationType>(req.Type, ignoreCase: true),
+            Channel = NotificationChannel.InApp,
+            Priority = NotificationPriority.Normal,
             UserId = req.UserId ?? GetCurrentUserId(),
             IsRead = false,
         };
@@ -85,7 +88,9 @@ public class NotificationsController : ControllerBase
 
     private static object MapToDto(Notification n) => new
     {
-        n.Id, n.Title, n.Message, n.Type, n.IsRead, n.ReadAt, n.UserId, n.CreatedAt
+        n.Id, n.Title, n.Message,
+        Type = n.Type.ToString(),
+        n.IsRead, n.ReadAt, n.UserId, n.CreatedAt
     };
 
     private Guid GetCurrentUserId() =>

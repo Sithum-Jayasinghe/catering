@@ -50,11 +50,12 @@ public class WarehousesController : ControllerBase
             WarehouseCode = req.WarehouseCode,
             Name = req.Name,
             Type = req.Type,
+            Status = "Active",
             Capacity = req.Capacity,
-            Location = req.Location,
             ContactPerson = req.ContactPerson,
             ContactPhone = req.ContactPhone,
             IsActive = true,
+            OpenedDate = DateTime.UtcNow,
         };
         await _repo.AddAsync(entity, ct);
         await _uow.CommitAsync(ct);
@@ -71,7 +72,6 @@ public class WarehousesController : ControllerBase
         existing.Name = req.Name;
         existing.Type = req.Type;
         existing.Capacity = req.Capacity;
-        existing.Location = req.Location;
         existing.ContactPerson = req.ContactPerson;
         existing.ContactPhone = req.ContactPhone;
         _repo.Update(existing);
@@ -86,6 +86,7 @@ public class WarehousesController : ControllerBase
         var existing = await _repo.GetByIdAsync(id, ct);
         if (existing == null) return NotFound();
         existing.IsActive = false;
+        existing.Status = "Inactive";
         _repo.Update(existing);
         await _uow.CommitAsync(ct);
         return NoContent();

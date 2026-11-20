@@ -45,7 +45,7 @@ public class GoodsReceivedController : ControllerBase
     {
         var entity = new Domain.Entities.GoodsReceivedNote
         {
-            GrnNumber = $"GRN-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid():N[..8]}",
+            GrnNumber = $"GRN-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..8].ToUpper()}",
             PurchaseOrderId = req.PurchaseOrderId,
             SupplierId = req.SupplierId,
             ReceivedBy = GetCurrentUserId(),

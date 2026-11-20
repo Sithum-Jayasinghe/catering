@@ -47,7 +47,7 @@ public class PurchaseOrdersController : ControllerBase
     {
         var entity = new Domain.Entities.PurchaseOrder
         {
-            PONumber = $"PO-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid():N[..8]}",
+            PONumber = $"PO-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..8].ToUpper()}",
             SupplierId = req.SupplierId,
             ShipToWarehouseId = req.ShipToWarehouseId,
             RequiredDate = req.RequiredDate,

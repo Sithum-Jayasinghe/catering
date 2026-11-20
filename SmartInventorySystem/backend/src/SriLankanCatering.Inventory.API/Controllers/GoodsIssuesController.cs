@@ -45,15 +45,16 @@ public class GoodsIssuesController : ControllerBase
     [Authorize(Roles = "Administrator,KitchenManager,StoreKeeper")]
     public async Task<ActionResult<GoodsIssueDto>> Create([FromBody] CreateGoodsIssueRequest req, CancellationToken ct)
     {
+        var userId = GetCurrentUserId();
         var entity = new GoodsIssue
         {
             IssueNumber = $"GI-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..6].ToUpper()}",
             WarehouseId = req.WarehouseId,
+            IssuanceToWarehouseId = req.WarehouseId,
             RequiredDate = req.RequiredDate,
-            Department = req.Department,
-            Purpose = req.Purpose,
             Notes = req.Notes,
-            RequestedBy = GetCurrentUserId(),
+            RequestedBy = userId,
+            RequestType = req.Purpose ?? "Kitchen",
             Status = Domain.Enums.GoodsIssueStatus.PendingApproval,
         };
 
@@ -63,7 +64,11 @@ public class GoodsIssuesController : ControllerBase
             {
                 GoodsIssueId = entity.Id,
                 ItemId = line.ItemId,
-                RequestedQuantity = line.Quantity,
+                BatchId = Guid.Empty,
+                ItemCode = string.Empty,
+                BatchNumber = string.Empty,
+                QuantityIssued = line.Quantity,
+                UnitOfMeasure = "KG",
                 Notes = line.Notes,
             });
         }

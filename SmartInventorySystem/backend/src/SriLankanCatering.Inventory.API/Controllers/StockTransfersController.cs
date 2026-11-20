@@ -45,15 +45,16 @@ public class StockTransfersController : ControllerBase
     [Authorize(Roles = "Administrator,InventoryManager,StoreKeeper")]
     public async Task<ActionResult<StockTransferDto>> Create([FromBody] CreateStockTransferRequest req, CancellationToken ct)
     {
+        var userId = GetCurrentUserId();
         var entity = new StockTransfer
         {
             TransferNumber = $"ST-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..6].ToUpper()}",
             FromWarehouseId = req.FromWarehouseId,
             ToWarehouseId = req.ToWarehouseId,
-            TransferReason = req.TransferReason,
             Notes = req.Notes,
-            RequestedBy = GetCurrentUserId(),
+            TransferRequestedBy = userId,
             Status = Domain.Enums.StockTransferStatus.PendingApproval,
+            ExpectedDeliveryDate = DateTime.UtcNow.AddDays(1),
         };
 
         foreach (var line in req.Lines)
@@ -62,7 +63,12 @@ public class StockTransfersController : ControllerBase
             {
                 StockTransferId = entity.Id,
                 ItemId = line.ItemId,
+                BatchId = line.BatchId,
+                FromStorageLocationId = line.FromStorageLocationId,
+                ToStorageLocationId = line.ToStorageLocationId,
                 Quantity = line.Quantity,
+                ItemCode = line.ItemCode ?? string.Empty,
+                BatchNumber = line.BatchNumber ?? string.Empty,
                 Notes = line.Notes,
             });
         }
@@ -78,7 +84,7 @@ public class StockTransfersController : ControllerBase
     {
         var existing = await _repo.GetWithLinesAsync(id, ct);
         if (existing == null) return NotFound();
-        existing.Status = Domain.Enums.StockTransferStatus.Approved;
+        existing.Status = Domain.Enums.StockTransferStatus.InTransit;
         existing.ApprovedBy = GetCurrentUserId();
         existing.ApprovedAt = DateTime.UtcNow;
         _repo.Update(existing);

@@ -91,6 +91,11 @@ public class StockTransferLineRequest
     public Guid ItemId { get; set; }
     public decimal Quantity { get; set; }
     public string? Notes { get; set; }
+    public Guid BatchId { get; set; }
+    public Guid FromStorageLocationId { get; set; }
+    public Guid ToStorageLocationId { get; set; }
+    public string? ItemCode { get; set; }
+    public string? BatchNumber { get; set; }
 }
 
 // ── User ─────────────────────────────────────────────────────────────────
