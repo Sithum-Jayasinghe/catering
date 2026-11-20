@@ -59,10 +59,9 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<ActionResult> Register([FromBody] CreateUserRequest req, CancellationToken ct)
     {
-        var existing = await _auth.FindByEmailAsync(req.Email, ct);
-        if (existing != null) return Conflict(new { message = "Email already registered" });
-
-        // Delegate to auth service for user creation
-        return Ok(new { message = "Registration successful. Please login." });
+        var result = await _auth.AuthenticateAsync(req.Email, req.Password, ct);
+        // If we can authenticate it means user already exists
+        if (result.IsSuccess) return Conflict(new { message = "Email already registered" });
+        return Ok(new { message = "Registration is handled by administrators. Please contact your admin." });
     }
 }
