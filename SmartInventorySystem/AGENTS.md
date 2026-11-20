@@ -19,30 +19,30 @@ This is the Enterprise AI-Powered Smart Inventory Management System for SriLanka
 ## Key Commands
 
 ```bash
-# Backend
+# Backend (uses Supabase PostgreSQL)
 cd backend && dotnet restore && dotnet run --project src/SriLankanCatering.Inventory.API
 cd backend && dotnet test
 
 # Web App
 cd web-app && npm install && npm run dev
 
-# Mobile App
-cd mobile-app && npx expo start
-
-# AI Services
-cd ai-services && npm install && npm run dev
-
-# Docker
+# Docker (local dev)
 docker compose up -d
 ```
+
+## Deployment
+
+- **Backend**: Render (Docker) — uses `Dockerfile.backend` + `render.yaml`
+- **Frontend**: Vercel — uses `vercel.json`
+- **Database**: Supabase (PostgreSQL) — connection string in `ConnectionStrings__Default` env var
 
 ## Critical Paths
 
 - Backend API: `backend/src/SriLankanCatering.Inventory.API/Program.cs`
 - Web App: `web-app/src/App.tsx`
-- Mobile: `mobile-app/App.tsx`
 - AI Services: `ai-services/src/index.ts`
-- Docker: `docker-compose.yml`
+- Render Config: `render.yaml`
+- Vercel Config: `web-app/vercel.json`
 
 ## Do Not Modify
 

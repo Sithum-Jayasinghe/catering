@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: smartinventory-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile.backend
+    dockerContext: .
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_URLS
+        value: http://+:8080
+      - key: ConnectionStrings__Default
+        value: "Host=db.adstcemhpbuzmomrbqko.supabase.co;Port=5432;Database=postgres;Username=postgres;Password=Sithum_123;SSL Mode=Require;Trust Server Certificate=true"
+      - key: Jwt__SecretKey
+        sync: false
+      - key: Jwt__Issuer
+        value: SriLankanCateringInventory
+      - key: Jwt__Audience
+        value: InventoryUsers
+      - key: ALLOWED_ORIGINS
+        sync: false          # set to your Vercel URL after deploy
+      - key: AiService__BaseUrl
+        value: http://localhost:8001

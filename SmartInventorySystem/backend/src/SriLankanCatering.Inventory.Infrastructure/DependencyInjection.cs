@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SriLankanCatering.Inventory.Application.Abstractions;
-using SriLankanCatering.Inventory.Domain.Entities;
 using SriLankanCatering.Inventory.Infrastructure.Configurations;
 using SriLankanCatering.Inventory.Infrastructure.Persistence;
 using SriLankanCatering.Inventory.Infrastructure.Repositories;
@@ -17,11 +16,17 @@ public static class DependencyInjection
         services.Configure<RedisSettings>(configuration.GetSection("Redis"));
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
 
-        services.AddStackExchangeRedisCache(opts =>
+        // Redis is optional — if not configured the app falls back to in-memory (registered in Program.cs)
+        var redisConnection = configuration.GetValue<string>("Redis:ConnectionString")
+            ?? Environment.GetEnvironmentVariable("REDIS_URL");
+        if (!string.IsNullOrWhiteSpace(redisConnection) && !redisConnection.StartsWith("localhost"))
         {
-            opts.Configuration = configuration.GetValue<string>("Redis:ConnectionString") ?? "localhost:6379";
-            opts.InstanceName = configuration.GetValue<string>("Redis:InstanceName") ?? "InventoryCache:";
-        });
+            services.AddStackExchangeRedisCache(opts =>
+            {
+                opts.Configuration = redisConnection;
+                opts.InstanceName = configuration.GetValue<string>("Redis:InstanceName") ?? "InventoryCache:";
+            });
+        }
 
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<IInventoryItemRepository, Infrastructure.Repositories.InventoryItemRepository>();

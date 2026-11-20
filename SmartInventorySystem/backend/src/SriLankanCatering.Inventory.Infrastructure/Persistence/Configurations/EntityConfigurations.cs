@@ -11,7 +11,7 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
     {
         builder.ToTable("Categories");
         builder.HasKey(c => c.Id);
-        builder.HasIndex(c => c.Code).IsUnique();
+        builder.HasIndex(c => c.Code).IsUnique().HasFilter("\"Code\" IS NOT NULL");
         builder.Property(c => c.Name).IsRequired().HasMaxLength(100);
         builder.HasOne(c => c.ParentCategory).WithMany(c => c.SubCategories).HasForeignKey(c => c.ParentCategoryId).OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
     }
